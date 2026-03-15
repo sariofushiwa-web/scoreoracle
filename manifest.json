@@ -1,0 +1,26 @@
+{
+  "name": "ScoreOracle — Elite Football Predictions",
+  "short_name": "ScoreOracle",
+  "description": "AI-powered football predictions. 6 bet types. Premium analysis.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#03060f",
+  "theme_color": "#03060f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/192/football2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/football2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "entertainment"],
+  "lang": "en"
+}
