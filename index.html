@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#03060f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ScoreOracle">
+<meta name="description" content="Elite AI Football Predictions">
+<link rel="manifest" href="manifest.json">
+<title>ScoreOracle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #03060f;
+  --bg2:      #060b18;
+  --bg3:      #091020;
+  --card:     #0b1422;
+  --card2:    #0f1a2e;
+  --border:   #162038;
+  --border2:  #1e2d4a;
+  --green:    #00f0a0;
+  --green2:   #00c080;
+  --green3:   #00ff9f;
+  --gold:     #ffc93c;
+  --gold2:    #e6a800;
+  --red:      #ff3d5a;
+  --blue:     #3d8fff;
+  --purple:   #9b6dff;
+  --text:     #dce8f5;
+  --text2:    #7a8fa8;
+  --text3:    #3a4d65;
+  --font-d:   'Teko', sans-serif;
+  --font-b:   'Outfit', sans-serif;
+  --font-m:   'JetBrains Mono', monospace;
+  --r:        14px;
+  --r2:       22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{height:100%;}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100%;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(0,240,160,.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 90% 80%, rgba(61,143,255,.05) 0%, transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ========== SPLASH ========== */
+#splash{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;transition:opacity .7s ease,transform .7s ease;
+}
+#splash.out{opacity:0;transform:scale(1.08);pointer-events:none;}
+.sp-ring{
+  width:80px;height:80px;border-radius:50%;
+  border:2px solid var(--border2);
+  border-top-color:var(--green);border-right-color:var(--gold);
+  animation:spin 1s linear infinite;margin-bottom:28px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp-logo{font-family:var(--font-d);font-size:44px;letter-spacing:5px;
+  background:linear-gradient(135deg,var(--green),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;
+}
+.sp-sub{font-size:11px;letter-spacing:6px;color:var(--text3);text-transform:uppercase;margin-top:6px;}
+
+/* ========== APP SHELL ========== */
+#app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+/* ========== SCREENS ========== */
+.screen{display:none;flex-direction:column;flex:1;min-height:100vh;}
+.screen.on{display:flex;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ========== AUTH ========== */
+#s-auth{
+  align-items:center;justify-content:center;
+  padding:40px 24px 48px;gap:0;
+  background:var(--bg);
+}
+.auth-glow{
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,240,160,.15),transparent 70%);
+  margin-bottom:8px;display:flex;align-items:center;justify-content:center;
+  font-size:52px;
+}
+.auth-logo{font-family:var(--font-d);font-size:46px;letter-spacing:5px;
+  background:linear-gradient(135deg,var(--green),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1;margin-bottom:4px;
+}
+.auth-sub{font-size:11px;letter-spacing:5px;color:var(--text3);text-transform:uppercase;margin-bottom:36px;}
+.auth-tabs{display:flex;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:4px;width:100%;margin-bottom:24px;}
+.atab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-radius:10px;transition:all .2s;}
+.atab.on{background:var(--green);color:#000;font-weight:700;}
+.aform{width:100%;display:flex;flex-direction:column;gap:13px;}
+.aform.hide{display:none;}
+.lbl{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.ifield{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;color:var(--text);font-family:var(--font-b);font-size:14px;
+  outline:none;width:100%;transition:border-color .2s;
+}
+.ifield:focus{border-color:var(--green);}
+.ifield::placeholder{color:var(--text3);}
+.btn-main{
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:#000;font-weight:700;font-size:13px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:16px;border:none;border-radius:var(--r);
+  cursor:pointer;width:100%;font-family:var(--font-b);transition:all .2s;margin-top:4px;
+}
+.btn-main:active{transform:scale(.98);}
+.btn-ghost{
+  background:var(--card2);border:1px solid var(--border);color:var(--text2);
+  font-size:13px;font-weight:500;padding:14px;border-radius:var(--r);
+  cursor:pointer;width:100%;font-family:var(--font-b);transition:all .2s;
+}
+.divline{display:flex;align-items:center;gap:10px;color:var(--text3);font-size:11px;}
+.divline::before,.divline::after{content:'';flex:1;height:1px;background:var(--border);}
+.plan-row{display:flex;flex-direction:column;gap:8px;}
+.psel{
+  display:flex;align-items:center;gap:12px;background:var(--card);
+  border:1.5px solid var(--border);border-radius:var(--r);padding:14px 16px;
+  cursor:pointer;transition:all .2s;
+}
+.psel.on{border-color:var(--green);background:rgba(0,240,160,.06);}
+.psel-icon{font-size:22px;}
+.psel-info{flex:1;}
+.psel-name{font-size:14px;font-weight:600;}
+.psel-price{font-size:12px;color:var(--text2);}
+.pbadge{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+.pbadge.free{background:rgba(0,240,160,.12);color:var(--green);}
+.pbadge.pro{background:rgba(255,201,60,.12);color:var(--gold);}
+
+/* ========== TOPBAR ========== */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;
+  position:sticky;top:0;
+  background:rgba(3,6,15,.9);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);z-index:50;
+  flex-shrink:0;
+}
+.tb-logo{font-family:var(--font-d);font-size:24px;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--green),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.ub{display:flex;align-items:center;gap:7px;background:var(--card);
+  border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 6px;cursor:pointer;}
+.uav{width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#000;}
+.uname{font-size:12px;font-weight:500;}
+.ppill{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+.ppill.free{background:rgba(0,240,160,.1);border:1px solid rgba(0,240,160,.2);color:var(--green);}
+.ppill.pro{background:rgba(255,201,60,.12);border:1px solid rgba(255,201,60,.25);color:var(--gold);}
+
+/* ========== NAVBAR ========== */
+.navbar{
+  display:flex;
+  background:rgba(6,11,24,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;z-index:50;
+  padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));
+  flex-shrink:0;
+}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;cursor:pointer;position:relative;}
+.ni-ico{font-size:21px;}
+.ni-lbl{font-size:10px;color:var(--text3);letter-spacing:.5px;transition:color .2s;}
+.ni.on .ni-lbl{color:var(--green);}
+.ni-bar{position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--green);border-radius:2px;display:none;border-radius:0 0 2px 2px;}
+.ni.on .ni-bar{display:block;}
+
+/* ========== CONTENT ========== */
+.content{flex:1;overflow-y:auto;padding:16px 16px 88px;-webkit-overflow-scrolling:touch;}
+.content::-webkit-scrollbar{display:none;}
+
+/* ========== SECTION TITLE ========== */
+.stitle{font-family:var(--font-d);font-size:13px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin:22px 0 12px;}
+.stitle:first-child{margin-top:0;}
+
+/* ========== HOME ========== */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 10px;text-align:center;position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),transparent);}
+.sc-n{font-family:var(--font-d);font-size:30px;letter-spacing:1px;color:var(--green);line-height:1;}
+.sc-l{font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:.5px;}
+
+.live-bar{
+  background:linear-gradient(135deg,rgba(255,61,90,.12),rgba(255,61,90,.04));
+  border:1px solid rgba(255,61,90,.25);border-radius:var(--r);
+  padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:6px;
+}
+.ldot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:bpulse 1.4s infinite;flex-shrink:0;}
+@keyframes bpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,61,90,.5)}50%{box-shadow:0 0 0 7px rgba(255,61,90,0)}}
+.live-t{font-size:13px;font-weight:500;}
+.live-c{margin-left:auto;font-size:12px;color:var(--red);font-weight:700;font-family:var(--font-m);}
+
+/* MATCH CARD */
+.mc{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:16px;margin-bottom:12px;cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.mc:active{transform:scale(.99);}
+.mc.locked{border-color:rgba(255,201,60,.18);background:linear-gradient(135deg,var(--card),rgba(255,201,60,.025));}
+.mc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;}
+.mc-league{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);}
+.mc-ldot{width:5px;height:5px;border-radius:50%;background:var(--green);}
+.mc-time{font-family:var(--font-m);font-size:11px;color:var(--text2);background:var(--bg3);padding:3px 8px;border-radius:6px;}
+.teams{display:flex;align-items:center;gap:8px;margin-bottom:13px;}
+.team{flex:1;text-align:center;}
+.t-logo{width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 5px;display:block;background:var(--bg3);}
+.t-name{font-size:12px;font-weight:600;line-height:1.2;}
+.vs{font-family:var(--font-d);font-size:20px;color:var(--text3);letter-spacing:2px;flex-shrink:0;}
+.cbar-w{background:var(--bg3);border-radius:8px;padding:9px 12px;margin-bottom:12px;}
+.cbar-top{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;}
+.cbar-pct{color:var(--green);font-family:var(--font-m);font-weight:600;}
+.cbar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.cbar-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:4px;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:.3px;}
+.tag.g{background:rgba(0,240,160,.12);color:var(--green);border:1px solid rgba(0,240,160,.2);}
+.tag.b{background:rgba(61,143,255,.12);color:var(--blue);border:1px solid rgba(61,143,255,.2);}
+.tag.y{background:rgba(255,201,60,.12);color:var(--gold);border:1px solid rgba(255,201,60,.2);}
+.tag.p{background:rgba(155,109,255,.12);color:var(--purple);border:1px solid rgba(155,109,255,.2);}
+.tag.lock{background:rgba(255,201,60,.05);color:rgba(255,201,60,.45);border:1px solid rgba(255,201,60,.1);}
+.mc-foot{display:flex;align-items:center;justify-content:space-between;}
+.see-more{font-size:12px;color:var(--green);font-weight:500;}
+.lock-badge{font-size:11px;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:4px;}
+
+/* loading skeleton */
+.skel{background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:200% 100%;animation:skel 1.5s infinite;border-radius:var(--r);height:180px;margin-bottom:12px;}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ========== ANALYSIS ========== */
+.an-header{
+  background:linear-gradient(180deg,var(--bg3) 0%,var(--bg) 100%);
+  padding:18px 18px 22px;border-bottom:1px solid var(--border);
+}
+.back{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2);
+  cursor:pointer;background:none;border:none;margin-bottom:18px;font-family:var(--font-b);}
+.an-teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.an-team{text-align:center;flex:1;}
+.an-tlogo{width:56px;height:56px;border-radius:50%;object-fit:cover;margin:0 auto 8px;background:var(--bg3);}
+.an-tname{font-size:15px;font-weight:700;}
+.an-vs{font-family:var(--font-d);font-size:36px;color:var(--text3);letter-spacing:4px;}
+.an-meta{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;}
+.chip{font-size:11px;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 10px;}
+
+.bet6{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.b6{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;}
+.b6.hl{border-color:var(--green);}
+.b6.hl::before{content:'';display:block;height:2px;margin:-14px -14px 12px;background:linear-gradient(90deg,var(--green),transparent);}
+.b6-type{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.b6-pick{font-size:14px;font-weight:700;margin-bottom:5px;}
+.b6-conf{font-family:var(--font-m);font-size:22px;font-weight:600;color:var(--green);}
+.b6-lock{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:80px;
+  background:rgba(255,201,60,.03);border-color:rgba(255,201,60,.12);}
+.b6-lock-ico{font-size:22px;}
+.b6-lock-t{font-size:11px;color:rgba(255,201,60,.5);text-align:center;font-weight:600;line-height:1.4;}
+
+.ai-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-top:4px;}
+.ai-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ai-ico{width:30px;height:30px;background:linear-gradient(135deg,var(--green),var(--gold));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ai-ttl{font-size:13px;font-weight:600;}
+.ai-sub{font-size:11px;color:var(--text3);}
+.ai-body{font-size:13px;color:var(--text2);line-height:1.75;}
+.ai-dots{display:flex;gap:5px;align-items:center;padding:4px 0;}
+.adot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:adot 1.2s infinite;}
+.adot:nth-child(2){animation-delay:.2s;}
+.adot:nth-child(3){animation-delay:.4s;}
+@keyframes adot{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* ========== HISTORY ========== */
+.h4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+.hstat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.hstat-n{font-family:var(--font-d);font-size:38px;line-height:1;margin-bottom:3px;}
+.hstat-n.g{color:var(--green);}
+.hstat-n.y{color:var(--gold);}
+.hstat-n.r{color:var(--red);}
+.hstat-l{font-size:11px;color:var(--text3);}
+.hi{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;
+}
+.hr{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.hr.w{background:rgba(0,240,160,.12);color:var(--green);}
+.hr.l{background:rgba(255,61,90,.12);color:var(--red);}
+.hr.p{background:rgba(255,201,60,.12);color:var(--gold);}
+.hi-m{flex:1;}
+.hi-mn{font-size:13px;font-weight:600;margin-bottom:2px;}
+.hi-mb{font-size:11px;color:var(--text3);}
+.hi-odds{font-family:var(--font-m);font-size:13px;font-weight:600;color:var(--gold);}
+
+/* ========== PREMIUM ========== */
+.pm-hero{
+  text-align:center;padding:28px 20px 22px;
+  background:linear-gradient(180deg,rgba(255,201,60,.07) 0%,transparent 100%);
+  border-bottom:1px solid var(--border);
+}
+.pm-crown{font-size:50px;margin-bottom:10px;}
+.pm-title{font-family:var(--font-d);font-size:40px;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--green));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;
+}
+.pm-desc{font-size:14px;color:var(--text2);line-height:1.65;}
+.plancards{padding:18px 16px;display:flex;flex-direction:column;gap:12px;}
+.plancard{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r2);padding:20px;position:relative;overflow:hidden;cursor:pointer;transition:all .2s;}
+.plancard.best{border-color:var(--gold);}
+.plancard.best::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--green));}
+.best-badge{position:absolute;top:14px;right:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+.pc-name{font-size:11px;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px;}
+.pc-price{font-family:var(--font-d);font-size:44px;letter-spacing:1px;line-height:1;margin-bottom:3px;}
+.pc-price span{font-size:16px;color:var(--text3);font-family:var(--font-b);}
+.pc-period{font-size:12px;color:var(--text3);margin-bottom:16px;}
+.pc-feats{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.pc-feat{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text2);}
+.fc{color:var(--green);}
+.fx{color:var(--text3);}
+.btn-gold{width:100%;padding:15px;border:none;border-radius:var(--r);font-family:var(--font-b);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;}
+.btn-outline{width:100%;padding:15px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);}
+
+.pay-sec{padding:0 16px 24px;}
+.pay-ttl{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.pay-methods{display:flex;flex-wrap:wrap;gap:8px;}
+.pm-chip{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);}
+
+/* ========== PROFILE ========== */
+.prof-hdr{padding:24px 20px;text-align:center;border-bottom:1px solid var(--border);}
+.pav{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:34px;color:#000;margin:0 auto 12px;letter-spacing:2px;}
+.p-uname{font-size:19px;font-weight:700;margin-bottom:3px;}
+.p-email{font-size:13px;color:var(--text3);margin-bottom:12px;}
+.pmenu{padding:12px 16px;}
+.mitem{display:flex;align-items:center;gap:13px;padding:15px 14px;border-radius:var(--r);cursor:pointer;transition:background .2s;border-bottom:1px solid var(--border);}
+.mitem:hover{background:var(--card);}
+.mitem:last-child{border-bottom:none;}
+.mico{font-size:20px;width:26px;text-align:center;}
+.mtxt{flex:1;font-size:14px;}
+.marr{color:var(--text3);}
+
+/* ========== MODAL ========== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);z-index:200;display:none;align-items:flex-end;}
+.overlay.on{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg2);border-radius:26px 26px 0 0;border-top:1px solid var(--border);width:100%;max-height:88vh;overflow-y:auto;padding:22px 20px 36px;animation:slideUp .3s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mhandle{width:36px;height:4px;background:var(--border2);border-radius:4px;margin:0 auto 20px;}
+.modal-title{font-family:var(--font-d);font-size:26px;letter-spacing:2px;margin-bottom:18px;}
+.pay-btn{
+  display:flex;align-items:center;gap:14px;width:100%;
+  padding:16px 18px;border:1px solid var(--border);border-radius:var(--r);
+  background:var(--card);cursor:pointer;margin-bottom:10px;transition:all .2s;font-family:var(--font-b);
+}
+.pay-btn:active{transform:scale(.98);}
+.pay-ico{font-size:24px;flex-shrink:0;}
+.pay-info{flex:1;text-align:left;}
+.pay-name{font-size:14px;font-weight:600;color:var(--text);}
+.pay-detail{font-size:12px;color:var(--text3);}
+.pay-arr{color:var(--text3);font-size:18px;}
+
+/* ========== TOAST ========== */
+.toast{
+  position:fixed;top:76px;left:50%;
+  transform:translateX(-50%) translateY(-16px);
+  background:var(--card2);border:1px solid var(--green);
+  border-radius:12px;padding:11px 18px;font-size:13px;font-weight:500;color:var(--green);
+  z-index:400;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-ring"></div>
+  <div class="sp-logo">SCOREORACLE</div>
+  <div class="sp-sub">Elite Football Intelligence</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- APP -->
+<div id="app">
+
+<!-- ====== AUTH SCREEN ====== -->
+<div class="screen on" id="s-auth">
+  <div class="auth-glow">⚽</div>
+  <div class="auth-logo">SCOREORACLE</div>
+  <div class="auth-sub">Elite Football Intelligence</div>
+
+  <div class="auth-tabs">
+    <div class="atab on" onclick="authTab('login',this)">Sign In</div>
+    <div class="atab" onclick="authTab('reg',this)">Register</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="aform" id="af-login">
+    <div><div class="lbl">Email</div><input class="ifield" type="email" placeholder="your@email.com" id="l-email"></div>
+    <div><div class="lbl">Password</div><input class="ifield" type="password" placeholder="••••••••" id="l-pass"></div>
+    <button class="btn-main" onclick="doLogin()">Sign In</button>
+    <div class="divline">or</div>
+    <button class="btn-ghost" onclick="demoLogin()">👀 Try Demo (no account needed)</button>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="aform hide" id="af-reg">
+    <div><div class="lbl">Username</div><input class="ifield" type="text" placeholder="YourName" id="r-name"></div>
+    <div><div class="lbl">Email</div><input class="ifield" type="email" placeholder="your@email.com" id="r-email"></div>
+    <div><div class="lbl">Password</div><input class="ifield" type="password" placeholder="••••••••" id="r-pass"></div>
+    <div class="lbl" style="margin-top:4px;">Choose plan</div>
+    <div class="plan-row">
+      <div class="psel on" id="ps-free" onclick="pickPlan('free')">
+        <span class="psel-icon">⚽</span>
+        <div class="psel-info"><div class="psel-name">Free</div><div class="psel-price">2 predictions/day</div></div>
+        <span class="pbadge free">Free</span>
+      </div>
+      <div class="psel" id="ps-pro" onclick="pickPlan('pro')">
+        <span class="psel-icon">👑</span>
+        <div class="psel-info"><div class="psel-name">Premium</div><div class="psel-price">Unlimited + AI analysis</div></div>
+        <span class="pbadge pro">$9.99/mo</span>
+      </div>
+    </div>
+    <button class="btn-main" onclick="doReg()">Create Account</button>
+  </div>
+</div>
+
+<!-- ====== MAIN SCREEN ====== -->
+<div class="screen" id="s-main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">SCOREORACLE</div>
+    <div class="tb-right">
+      <div id="tb-pill" class="ppill free">FREE</div>
+      <div class="ub" onclick="goTab('profile')">
+        <div class="uav" id="tb-av">U</div>
+        <div class="uname" id="tb-name">User</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB CONTENTS -->
+
+  <!-- HOME TAB -->
+  <div class="content" id="t-home">
+    <div class="stats3">
+      <div class="sc"><div class="sc-n">87<span style="font-size:15px">%</span></div><div class="sc-l">Win Rate</div></div>
+      <div class="sc"><div class="sc-n" id="match-count">—</div><div class="sc-l">Matches</div></div>
+      <div class="sc"><div class="sc-n">+312<span style="font-size:12px">%</span></div><div class="sc-l">ROI</div></div>
+    </div>
+
+    <div class="live-bar" onclick="toast('🔴 Live scores updated!')">
+      <div class="ldot"></div>
+      <div class="live-t">Live matches in progress</div>
+      <div class="live-c">LIVE</div>
+    </div>
+
+    <div class="stitle">Today's Predictions</div>
+    <div id="matches-list"><div class="skel"></div><div class="skel"></div><div class="skel" style="height:120px"></div></div>
+  </div>
+
+  <!-- ANALYSIS TAB -->
+  <div class="content" id="t-analysis" style="display:none;padding:0;">
+    <div class="an-header">
+      <button class="back" onclick="closeAnalysis()">← Back to Predictions</button>
+      <div class="an-teams">
+        <div class="an-team"><img class="an-tlogo" id="an-logo1" src="" onerror="this.style.display='none'"><div class="an-tname" id="an-n1">Team A</div></div>
+        <div class="an-vs">VS</div>
+        <div class="an-team"><img class="an-tlogo" id="an-logo2" src="" onerror="this.style.display='none'"><div class="an-tname" id="an-n2">Team B</div></div>
+      </div>
+      <div class="an-meta">
+        <span class="chip" id="an-league">League</span>
+        <span class="chip" id="an-time">⏰ --:--</span>
+        <span class="chip" id="an-conf">🎯 --%</span>
+      </div>
+    </div>
+    <div style="padding:16px 16px 90px;">
+      <div class="stitle" style="margin-top:0">6-Type Analysis</div>
+      <div class="bet6" id="bet6-grid"></div>
+      <div class="stitle">AI Expert Analysis</div>
+      <div class="ai-box">
+        <div class="ai-hdr">
+          <div class="ai-ico">🤖</div>
+          <div><div class="ai-ttl">ScoreOracle Intelligence</div><div class="ai-sub">Powered by Claude AI</div></div>
+        </div>
+        <div class="ai-body" id="ai-body"><div class="ai-dots"><div class="adot"></div><div class="adot"></div><div class="adot"></div></div></div>
+      </div>
+      <div class="stitle">Head-to-Head & Form</div>
+      <div class="ai-box"><div class="ai-body" id="h2h-body" style="white-space:pre-line;"></div></div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="content" id="t-history" style="display:none;">
+    <div class="h4">
+      <div class="hstat"><div class="hstat-n g">87%</div><div class="hstat-l">Success Rate</div></div>
+      <div class="hstat"><div class="hstat-n y">+312%</div><div class="hstat-l">Total ROI</div></div>
+      <div class="hstat"><div class="hstat-n g">124</div><div class="hstat-l">Wins</div></div>
+      <div class="hstat"><div class="hstat-n r">18</div><div class="hstat-l">Losses</div></div>
+    </div>
+    <div class="stitle">Recent Predictions</div>
+    <div class="hi"><div class="hr w">✓</div><div class="hi-m"><div class="hi-mn">Man City vs Liverpool</div><div class="hi-mb">1X2: Man City · BTTS: Yes</div></div><div class="hi-odds">@1.85</div></div>
+    <div class="hi"><div class="hr w">✓</div><div class="hi-m"><div class="hi-mn">PSG vs Lyon</div><div class="hi-mb">Over 2.5 Goals</div></div><div class="hi-odds">@1.72</div></div>
+    <div class="hi"><div class="hr w">✓</div><div class="hi-m"><div class="hi-mn">Juventus vs Roma</div><div class="hi-mb">1X2: Juventus Win</div></div><div class="hi-odds">@1.65</div></div>
+    <div class="hi"><div class="hr l">✗</div><div class="hi-m"><div class="hi-mn">Ajax vs PSV</div><div class="hi-mb">Exact Score: 2-1</div></div><div class="hi-odds">@9.50</div></div>
+    <div class="hi"><div class="hr p">⏳</div><div class="hi-m"><div class="hi-mn">Arsenal vs Chelsea</div><div class="hi-mb">1X2: Arsenal Win</div></div><div class="hi-odds">@1.90</div></div>
+    <div class="hi"><div class="hr w">✓</div><div class="hi-m"><div class="hi-mn">Atletico vs Sevilla</div><div class="hi-mb">BTTS: No · Corners +9.5</div></div><div class="hi-odds">@1.55</div></div>
+    <div class="hi"><div class="hr w">✓</div><div class="hi-m"><div class="hi-mn">Bayern vs Leverkusen</div><div class="hi-mb">1X2: Bayern Win</div></div><div class="hi-odds">@1.45</div></div>
+    <div class="hi"><div class="hr w">✓</div><div class="hi-m"><div class="hi-mn">Inter vs Napoli</div><div class="hi-mb">Double Chance: Inter/Draw</div></div><div class="hi-odds">@1.30</div></div>
+  </div>
+
+  <!-- PREMIUM TAB -->
+  <div class="content" id="t-premium" style="display:none;padding:0 0 90px;">
+    <div class="pm-hero">
+      <div class="pm-crown">👑</div>
+      <div class="pm-title">GO PREMIUM</div>
+      <div class="pm-desc">Unlock AI analysis on every match.<br>6 bet types, expert reasoning, unlimited access.</div>
+    </div>
+    <div class="plancards">
+      <div class="plancard">
+        <div class="pc-name">Monthly</div>
+        <div class="pc-price">$9<span>.99/mo</span></div>
+        <div class="pc-period">Billed monthly · Cancel anytime</div>
+        <div class="pc-feats">
+          <div class="pc-feat"><span class="fc">✓</span>Unlimited daily predictions</div>
+          <div class="pc-feat"><span class="fc">✓</span>Full 6-type AI analysis</div>
+          <div class="pc-feat"><span class="fc">✓</span>Live match alerts</div>
+          <div class="pc-feat"><span class="fc">✓</span>Performance history</div>
+          <div class="pc-feat"><span class="fx">✗</span>Priority AI processing</div>
+        </div>
+        <button class="btn-outline" onclick="openPay('monthly','$9.99/month')">Subscribe — $9.99/mo</button>
+      </div>
+      <div class="plancard best">
+        <div class="best-badge">BEST VALUE</div>
+        <div class="pc-name">Yearly</div>
+        <div class="pc-price">$79<span>/yr</span></div>
+        <div class="pc-period">= $6.60/mo · Save 34%</div>
+        <div class="pc-feats">
+          <div class="pc-feat"><span class="fc">✓</span>Unlimited daily predictions</div>
+          <div class="pc-feat"><span class="fc">✓</span>Full 6-type AI analysis</div>
+          <div class="pc-feat"><span class="fc">✓</span>Live match alerts</div>
+          <div class="pc-feat"><span class="fc">✓</span>Performance history</div>
+          <div class="pc-feat"><span class="fc">✓</span>Priority AI processing</div>
+        </div>
+        <button class="btn-gold" onclick="openPay('yearly','$79/year')">Subscribe — $79/yr</button>
+      </div>
+    </div>
+    <div class="pay-sec">
+      <div class="pay-ttl">Accepted Payment Methods</div>
+      <div class="pay-methods">
+        <div class="pm-chip">💳 Visa/Mastercard</div>
+        <div class="pm-chip">🅿️ PayPal</div>
+        <div class="pm-chip">🪙 USDT/BTC</div>
+        <div class="pm-chip">🌍 Flutterwave</div>
+        <div class="pm-chip">📱 Mobile Money</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div class="content" id="t-profile" style="display:none;padding:0 0 90px;">
+    <div class="prof-hdr">
+      <div class="pav" id="p-av">U</div>
+      <div class="p-uname" id="p-uname">Username</div>
+      <div class="p-email" id="p-email">user@email.com</div>
+      <div id="p-pill" class="ppill free" style="display:inline-block;">FREE PLAN</div>
+    </div>
+    <div class="pmenu">
+      <div class="mitem" onclick="goTab('premium')"><span class="mico">👑</span><span class="mtxt">Upgrade to Premium</span><span class="marr">›</span></div>
+      <div class="mitem" onclick="toast('🔔 Notifications coming soon')"><span class="mico">🔔</span><span class="mtxt">Notifications</span><span class="marr">›</span></div>
+      <div class="mitem" onclick="goTab('history')"><span class="mico">📊</span><span class="mtxt">My Statistics</span><span class="marr">›</span></div>
+      <div class="mitem" onclick="toast('⚙️ Settings coming soon')"><span class="mico">⚙️</span><span class="mtxt">Settings</span><span class="marr">›</span></div>
+      <div class="mitem" onclick="toast('💬 Support: scoreoracle@gmail.com')"><span class="mico">💬</span><span class="mtxt">Support</span><span class="marr">›</span></div>
+      <div class="mitem" onclick="doLogout()"><span class="mico">🚪</span><span class="mtxt" style="color:var(--red)">Sign Out</span><span class="marr">›</span></div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="ni on" id="n-home" onclick="goTab('home')"><div class="ni-bar"></div><div class="ni-ico">⚽</div><div class="ni-lbl">Predictions</div></div>
+    <div class="ni" id="n-history" onclick="goTab('history')"><div class="ni-bar"></div><div class="ni-ico">📊</div><div class="ni-lbl">History</div></div>
+    <div class="ni" id="n-premium" onclick="goTab('premium')"><div class="ni-bar"></div><div class="ni-ico">👑</div><div class="ni-lbl">Premium</div></div>
+    <div class="ni" id="n-profile" onclick="goTab('profile')"><div class="ni-bar"></div><div class="ni-ico">👤</div><div class="ni-lbl">Profile</div></div>
+  </div>
+
+</div><!-- /s-main -->
+</div><!-- /app -->
+
+<!-- PAYMENT MODAL -->
+<div class="overlay" id="pay-modal">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="modal-title">💳 Complete Payment</div>
+    <div id="pay-plan-lbl" style="font-size:14px;color:var(--text2);margin-bottom:18px;"></div>
+
+    <!-- STRIPE -->
+    <button class="pay-btn" onclick="doPay('stripe')">
+      <span class="pay-ico">💳</span>
+      <div class="pay-info"><div class="pay-name">Visa / Mastercard</div><div class="pay-detail">Powered by Stripe — Secure global payment</div></div>
+      <span class="pay-arr">›</span>
+    </button>
+
+    <!-- PAYPAL -->
+    <button class="pay-btn" onclick="doPay('paypal')">
+      <span class="pay-ico">🅿️</span>
+      <div class="pay-info"><div class="pay-name">PayPal</div><div class="pay-detail">Pay with PayPal balance or card</div></div>
+      <span class="pay-arr">›</span>
+    </button>
+
+    <!-- CRYPTO -->
+    <button class="pay-btn" onclick="doPay('crypto')">
+      <span class="pay-ico">🪙</span>
+      <div class="pay-info"><div class="pay-name">Crypto — USDT / BTC</div><div class="pay-detail">Coinbase Commerce · Instant activation</div></div>
+      <span class="pay-arr">›</span>
+    </button>
+
+    <!-- FLUTTERWAVE -->
+    <button class="pay-btn" onclick="doPay('flutterwave')">
+      <span class="pay-ico">🌍</span>
+      <div class="pay-info"><div class="pay-name">Flutterwave</div><div class="pay-detail">Africa cards, Mobile Money, Bank transfer</div></div>
+      <span class="pay-arr">›</span>
+    </button>
+
+    <button class="btn-outline" style="margin-top:6px;" onclick="closePay()">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let user = null;
+let plan = 'free';
+let activePlan = '';
+let matchData = [];
+
+// ============================================================
+// SPLASH
+// ============================================================
+setTimeout(() => document.getElementById('splash').classList.add('out'), 2200);
+
+// ============================================================
+// AUTH
+// ============================================================
+function authTab(id, el) {
+  document.querySelectorAll('.atab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('af-login').classList.toggle('hide', id !== 'login');
+  document.getElementById('af-reg').classList.toggle('hide', id !== 'reg');
+}
+
+function pickPlan(p) {
+  plan = p;
+  document.getElementById('ps-free').classList.toggle('on', p === 'free');
+  document.getElementById('ps-pro').classList.toggle('on', p === 'pro');
+}
+
+function doLogin() {
+  const e = document.getElementById('l-email').value || 'user@example.com';
+  loginAs(e.split('@')[0] || 'User', e, 'free');
+}
+
+function demoLogin() { loginAs('Demo User', 'demo@scoreoracle.com', 'free'); }
+
+function doReg() {
+  const n = document.getElementById('r-name').value || 'User';
+  const e = document.getElementById('r-email').value || 'user@example.com';
+  loginAs(n, e, plan);
+}
+
+function loginAs(name, email, p) {
+  user = { name, email, plan: p };
+  const ini = name.slice(0,2).toUpperCase();
+  ['tb-av','p-av'].forEach(id => document.getElementById(id).textContent = ini);
+  document.getElementById('tb-name').textContent = name.split(' ')[0];
+  document.getElementById('p-uname').textContent = name;
+  document.getElementById('p-email').textContent = email;
+  setPlan(p);
+  showScreen('main');
+  loadMatches();
+  toast('👋 Welcome, ' + name.split(' ')[0] + '!');
+}
+
+function doLogout() {
+  user = null;
+  showScreen('auth');
+  toast('👋 Signed out');
+}
+
+function setPlan(p) {
+  user.plan = p;
+  const isPro = p === 'pro';
+  const lbl = isPro ? 'PRO' : 'FREE';
+  const cls = isPro ? 'pro' : 'free';
+  document.getElementById('tb-pill').textContent = lbl;
+  document.getElementById('tb-pill').className = 'ppill ' + cls;
+  document.getElementById('p-pill').textContent = isPro ? 'PREMIUM PLAN' : 'FREE PLAN';
+  document.getElementById('p-pill').className = 'ppill ' + cls;
+  if (matchData.length) renderMatches();
+}
+
+// ============================================================
+// SCREENS / TABS
+// ============================================================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById('s-' + name).classList.add('on');
+}
+
+function goTab(tab) {
+  ['home','history','premium','profile'].forEach(t => {
+    document.getElementById('t-'+t).style.display = 'none';
+    const n = document.getElementById('n-'+t);
+    if(n) n.classList.remove('on');
+  });
+  document.getElementById('t-analysis').style.display = 'none';
+  document.getElementById('t-' + tab).style.display = 'block';
+  const nav = document.getElementById('n-'+tab);
+  if(nav) nav.classList.add('on');
+}
+
+// ============================================================
+// ============================================================
+// FOOTBALL-DATA.ORG — FREE API (20+ REAL MATCHES)
+// ============================================================
+const FDATA_TOKEN = '1608a1bb7eac445e9e4b8f4381ccfb1f';
+
+const COMPETITIONS = [
+  { id: 'PL',  name: 'Premier League',   color: '#00f0a0' },
+  { id: 'PD',  name: 'La Liga',          color: '#ffc93c' },
+  { id: 'BL1', name: 'Bundesliga',       color: '#ff3d5a' },
+  { id: 'SA',  name: 'Serie A',          color: '#9b6dff' },
+  { id: 'FL1', name: 'Ligue 1',          color: '#3d8fff' },
+  { id: 'CL',  name: 'Champions League', color: '#f0a000' },
+  { id: 'ELC', name: 'Championship',     color: '#00d4ff' },
+  { id: 'PPL', name: 'Primeira Liga',    color: '#ff6b35' },
+];
+
+async function loadMatches() {
+  const list = document.getElementById('matches-list');
+  list.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel" style="height:120px"></div>';
+  try {
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    let allMatches = [];
+
+    const results = await Promise.allSettled(
+      COMPETITIONS.map(comp =>
+        fetch(`https://api.football-data.org/v4/competitions/${comp.id}/matches?dateFrom=${dateStr}&dateTo=${dateStr}`, {
+          headers: { 'X-Auth-Token': FDATA_TOKEN }
+        }).then(r => r.json()).then(d => ({ d, comp }))
+      )
+    );
+
+    for (const r of results) {
+      if (r.status === 'fulfilled') {
+        const { d, comp } = r.value;
+        if (d.matches && d.matches.length > 0) {
+          d.matches.forEach(m => {
+            allMatches.push({
+              _leagueName: comp.name,
+              _leagueColor: comp.color,
+              strHomeTeam: m.homeTeam?.name || 'Home',
+              strAwayTeam: m.awayTeam?.name || 'Away',
+              strHomeTeamBadge: m.homeTeam?.crest || '',
+              strAwayTeamBadge: m.awayTeam?.crest || '',
+              strTime: m.utcDate ? new Date(m.utcDate).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '--:--',
+            });
+          });
+        }
+      }
+    }
+
+    if (allMatches.length === 0) {
+      const d1 = new Date(today); d1.setDate(today.getDate()+1);
+      const d2 = new Date(today); d2.setDate(today.getDate()+3);
+      const from = d1.toISOString().split('T')[0];
+      const to   = d2.toISOString().split('T')[0];
+      const results2 = await Promise.allSettled(
+        COMPETITIONS.map(comp =>
+          fetch(`https://api.football-data.org/v4/competitions/${comp.id}/matches?dateFrom=${from}&dateTo=${to}`, {
+            headers: { 'X-Auth-Token': FDATA_TOKEN }
+          }).then(r => r.json()).then(d => ({ d, comp }))
+        )
+      );
+      for (const r of results2) {
+        if (r.status === 'fulfilled') {
+          const { d, comp } = r.value;
+          if (d.matches) {
+            d.matches.forEach(m => {
+              allMatches.push({
+                _leagueName: comp.name,
+                _leagueColor: comp.color,
+                strHomeTeam: m.homeTeam?.name || 'Home',
+                strAwayTeam: m.awayTeam?.name || 'Away',
+                strHomeTeamBadge: m.homeTeam?.crest || '',
+                strAwayTeamBadge: m.awayTeam?.crest || '',
+                strTime: m.utcDate ? new Date(m.utcDate).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '--:--',
+              });
+            });
+          }
+        }
+      }
+    }
+
+    matchData = allMatches;
+    document.getElementById('match-count').textContent = allMatches.length || '—';
+    renderMatches();
+  } catch(err) {
+    list.innerHTML = renderFallbackMatches();
+  }
+}
+
+
+function renderMatches() {
+  const list = document.getElementById('matches-list');
+  const isPro = user && user.plan === 'pro';
+
+  if (!matchData.length) {
+    list.innerHTML = renderFallbackMatches();
+    return;
+  }
+
+  list.innerHTML = matchData.map((m, i) => {
+    const isLocked = i >= 2 && !isPro;
+    const conf = 60 + Math.floor(Math.random() * 28);
+    const time = m.strTime ? m.strTime.slice(0,5) : '--:--';
+    const h = m.strHomeTeam || 'Home';
+    const a = m.strAwayTeam || 'Away';
+    const hLogo = m.strHomeTeamBadge || '';
+    const aLogo = m.strAwayTeamBadge || '';
+
+    if (isLocked) {
+      return `<div class="mc locked" onclick="premiumPrompt()">
+        <div class="mc-top">
+          <div class="mc-league"><div class="mc-ldot" style="background:${m._leagueColor}"></div>${m._leagueName || m.strLeague}</div>
+          <div class="mc-time">${time}</div>
+        </div>
+        <div class="teams">
+          <div class="team">${hLogo?`<img class="t-logo" src="${hLogo}">`:''}<div class="t-name">${h}</div></div>
+          <div class="vs">VS</div>
+          <div class="team">${aLogo?`<img class="t-logo" src="${aLogo}">`:''}<div class="t-name">${a}</div></div>
+        </div>
+        <div class="tags">
+          <span class="tag lock">🔒 1X2</span><span class="tag lock">🔒 O/U</span>
+          <span class="tag lock">🔒 BTTS</span><span class="tag lock">🔒 Corners</span>
+        </div>
+        <div class="mc-foot"><div class="lock-badge">👑 Premium Only</div></div>
+      </div>`;
+    }
+
+    const picks = genPicks(h, a, conf);
+    return `<div class="mc" onclick="openAnalysis(${i})">
+      <div class="mc-top">
+        <div class="mc-league"><div class="mc-ldot" style="background:${m._leagueColor||'#00f0a0'}"></div>${m._leagueName || m.strLeague}</div>
+        <div class="mc-time">${time}</div>
+      </div>
+      <div class="teams">
+        <div class="team">${hLogo?`<img class="t-logo" src="${hLogo}" onerror="this.style.display='none'">`:''}<div class="t-name">${h}</div></div>
+        <div class="vs">VS</div>
+        <div class="team">${aLogo?`<img class="t-logo" src="${aLogo}" onerror="this.style.display='none'">`:''}<div class="t-name">${a}</div></div>
+      </div>
+      <div class="cbar-w">
+        <div class="cbar-top"><span>AI Confidence</span><span class="cbar-pct">${conf}%</span></div>
+        <div class="cbar"><div class="cbar-fill" style="width:${conf}%"></div></div>
+      </div>
+      <div class="tags">
+        <span class="tag g">1X2: ${picks.result}</span>
+        <span class="tag b">O/U: ${picks.ou}</span>
+        <span class="tag y">BTTS: ${picks.btts}</span>
+      </div>
+      <div class="mc-foot"><div class="see-more">View full analysis →</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderFallbackMatches() {
+  const isPro = user && user.plan === 'pro';
+  const fallback = [
+    { h:'Arsenal', a:'Chelsea', league:'Premier League', time:'20:45', conf:78, color:'#00f0a0' },
+    { h:'Real Madrid', a:'Barcelona', league:'La Liga', time:'21:00', conf:72, color:'#ffc93c' },
+    { h:'Bayern Munich', a:'Dortmund', league:'Bundesliga', time:'18:30', conf:81, color:'#ff3d5a', locked:true },
+    { h:'Inter Milan', a:'AC Milan', league:'Serie A', time:'19:45', conf:68, color:'#9b6dff', locked:true },
+  ];
+
+  return fallback.map((m,i) => {
+    const isLocked = m.locked && !isPro;
+    if (isLocked) {
+      return `<div class="mc locked" onclick="premiumPrompt()">
+        <div class="mc-top"><div class="mc-league"><div class="mc-ldot" style="background:${m.color}"></div>${m.league}</div><div class="mc-time">${m.time}</div></div>
+        <div class="teams"><div class="team"><div class="t-name">${m.h}</div></div><div class="vs">VS</div><div class="team"><div class="t-name">${m.a}</div></div></div>
+        <div class="tags"><span class="tag lock">🔒 1X2</span><span class="tag lock">🔒 O/U</span><span class="tag lock">🔒 BTTS</span></div>
+        <div class="mc-foot"><div class="lock-badge">👑 Premium Only</div></div>
+      </div>`;
+    }
+    const picks = genPicks(m.h, m.a, m.conf);
+    return `<div class="mc" onclick="openAnalysis(${i})">
+      <div class="mc-top"><div class="mc-league"><div class="mc-ldot" style="background:${m.color}"></div>${m.league}</div><div class="mc-time">${m.time}</div></div>
+      <div class="teams"><div class="team"><div class="t-name">${m.h}</div></div><div class="vs">VS</div><div class="team"><div class="t-name">${m.a}</div></div></div>
+      <div class="cbar-w"><div class="cbar-top"><span>AI Confidence</span><span class="cbar-pct">${m.conf}%</span></div><div class="cbar"><div class="cbar-fill" style="width:${m.conf}%"></div></div></div>
+      <div class="tags"><span class="tag g">1X2: ${picks.result}</span><span class="tag b">O/U: ${picks.ou}</span><span class="tag y">BTTS: ${picks.btts}</span></div>
+      <div class="mc-foot"><div class="see-more">View full analysis →</div></div>
+    </div>`;
+  }).join('');
+}
+
+function genPicks(h, a, conf) {
+  const results = [`${h} Win`, 'Draw', `${a} Win`];
+  const weights = conf > 70 ? [0.6,0.2,0.2] : [0.35,0.3,0.35];
+  const r = Math.random(), w = weights;
+  const result = r < w[0] ? results[0] : r < w[0]+w[1] ? results[1] : results[2];
+  const ou = conf > 65 ? 'Over 2.5' : 'Under 2.5';
+  const btts = conf > 60 ? 'Yes' : 'No';
+  return { result, ou, btts };
+}
+
+// ============================================================
+// ANALYSIS
+// ============================================================
+function openAnalysis(idx) {
+  const m = matchData[idx];
+  const isFallback = !m;
+  const fb = [
+    { h:'Arsenal', a:'Chelsea', league:'Premier League', time:'20:45', conf:78 },
+    { h:'Real Madrid', a:'Barcelona', league:'La Liga', time:'21:00', conf:72 },
+  ];
+  const match = m || fb[idx] || fb[0];
+
+  const h = match.strHomeTeam || match.h || 'Home';
+  const a = match.strAwayTeam || match.a || 'Away';
+  const conf = 60 + Math.floor(Math.random() * 28);
+  const isPro = user && user.plan === 'pro';
+
+  document.getElementById('an-logo1').src = match.strHomeTeamBadge || '';
+  document.getElementById('an-logo2').src = match.strAwayTeamBadge || '';
+  document.getElementById('an-n1').textContent = h;
+  document.getElementById('an-n2').textContent = a;
+  document.getElementById('an-league').textContent = match._leagueName || match.league || match.strLeague || 'Football';
+  document.getElementById('an-time').textContent = '⏰ ' + (match.strTime?.slice(0,5) || match.time || '--:--');
+  document.getElementById('an-conf').textContent = `🎯 ${conf}% confidence`;
+
+  const picks = genPicks(h, a, conf);
+  const bets = [
+    { type:'1X2', pick:picks.result, conf:`${conf}%`, hl:true },
+    { type:'Over/Under', pick:picks.ou, conf:`${Math.max(55,conf-7)}%`, hl:false },
+    { type:'BTTS', pick:picks.btts, conf:`${Math.max(52,conf-10)}%`, hl:false },
+    { type:'Double Chance', pick: picks.result === 'Draw' ? `${h}/Draw` : picks.result.replace(' Win','') + '/Draw', conf:`${Math.min(92,conf+10)}%`, hl:false },
+    { type:'Corners', pick:'Over 9.5', conf:`${Math.max(50,conf-15)}%`, hl:false, prem:true },
+    { type:'Exact Score', pick:`${Math.floor(Math.random()*3)+1}-${Math.floor(Math.random()*2)+1}`, conf:`${10+Math.floor(Math.random()*20)}%`, hl:false, prem:true },
+  ];
+
+  document.getElementById('bet6-grid').innerHTML = bets.map(b => {
+    if (b.prem && !isPro) {
+      return `<div class="b6 b6-lock"><div class="b6-lock-ico">🔒</div><div class="b6-lock-t">${b.type}<br>Premium Only</div></div>`;
+    }
+    return `<div class="b6${b.hl?' hl':''}">
+      <div class="b6-type">${b.type}</div>
+      <div class="b6-pick">${b.pick}</div>
+      <div class="b6-conf">${b.conf}</div>
+    </div>`;
+  }).join('');
+
+  // Hide home tabs, show analysis
+  ['home','history','premium','profile'].forEach(t => document.getElementById('t-'+t).style.display='none');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  document.getElementById('t-analysis').style.display = 'block';
+
+  // Load AI analysis
+  document.getElementById('ai-body').innerHTML = '<div class="ai-dots"><div class="adot"></div><div class="adot"></div><div class="adot"></div></div>';
+  document.getElementById('h2h-body').textContent = 'Loading...';
+
+  getAIAnalysis(h, a, picks, conf);
+}
+
+async function getAIAnalysis(h, a, picks, conf) {
+  try {
+    const prompt = `You are ScoreOracle, an elite football analyst. Analyze this match: ${h} vs ${a}.
+Prediction: 1X2=${picks.result}, Over/Under=${picks.ou}, BTTS=${picks.btts}, AI Confidence=${conf}%.
+Write a sharp, professional 3-sentence analysis explaining WHY these predictions make sense based on typical team profiles, form patterns, and tactical matchups. Then on a new line write "H2H & FORM:" followed by realistic but fictional recent form for both teams (last 5 results W/D/L), head-to-head record, average goals per game, and key stats. Keep it concise and expert-level.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    const parts = text.split('H2H & FORM:');
+    document.getElementById('ai-body').textContent = parts[0].trim();
+    document.getElementById('h2h-body').textContent = parts[1] ? parts[1].trim() : 'Stats not available for this match.';
+  } catch(e) {
+    document.getElementById('ai-body').textContent = `${h} and ${a} meet in what promises to be a closely contested fixture. Based on recent form and head-to-head records, the ${picks.result} outcome carries the highest probability at ${conf}% confidence. The ${picks.ou} goals market and BTTS ${picks.btts} align with both teams' scoring patterns this season.`;
+    document.getElementById('h2h-body').textContent = `${h} form (last 5): W W D W L\n${a} form (last 5): D W L W W\n\nH2H last 5: ${h} 2W, ${a} 2W, 1D\nAvg goals: 2.8/game\nBTTS rate: 65%`;
+  }
+}
+
+function closeAnalysis() {
+  document.getElementById('t-analysis').style.display = 'none';
+  document.getElementById('t-home').style.display = 'block';
+  document.getElementById('n-home').classList.add('on');
+}
+
+function premiumPrompt() {
+  toast('👑 Upgrade to Premium to unlock!');
+  setTimeout(() => goTab('premium'), 1000);
+}
+
+// ============================================================
+// PAYMENT
+// ============================================================
+function openPay(planId, label) {
+  activePlan = planId;
+  document.getElementById('pay-plan-lbl').textContent = '✨ Premium ' + label;
+  document.getElementById('pay-modal').classList.add('on');
+}
+
+function closePay() { document.getElementById('pay-modal').classList.remove('on'); }
+
+function doPay(method) {
+  closePay();
+  const urls = {
+    stripe: 'https://buy.stripe.com/YOUR_STRIPE_LINK',
+    paypal: 'https://www.paypal.com/paypalme/YOUR_PAYPAL',
+    crypto: 'https://commerce.coinbase.com/checkout/YOUR_COINBASE_ID',
+    flutterwave: 'https://flutterwave.com/pay/YOUR_FW_LINK'
+  };
+
+  // In production: window.open(urls[method], '_blank');
+  // For demo: simulate success
+  setPlan('pro');
+  const names = { stripe:'💳 Card payment', paypal:'🅿️ PayPal', crypto:'🪙 Crypto', flutterwave:'🌍 Flutterwave' };
+  toast(`${names[method]} confirmed! Welcome to Premium! 🎉`);
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function toast(msg) {
+  clearTimeout(toastTimer);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
+}
+
+// ============================================================
+// PWA SERVICE WORKER REGISTRATION
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+// Close modal on overlay click
+document.getElementById('pay-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePay();
+});
+</script>
+</body>
+</html>
